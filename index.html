@@ -6,7 +6,7 @@
 <title>AI Society Lab — Observatorio</title>
 <meta name="description" content="Observatorio en vivo de una sociedad sintética de agentes LLM. Experimento pre-registrado.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%234a9ec4'/></svg>">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 <header>
@@ -24,6 +24,14 @@
 <main>
   <section class="stage-wrap">
     <canvas id="stage"></canvas>
+
+    <div class="cam-controls">
+      <button id="zoomIn" title="Acercar">+</button>
+      <button id="zoomOut" title="Alejar">−</button>
+      <button id="camHome" title="Ver todo">⌂</button>
+    </div>
+    <div class="hint">arrastra para moverte · rueda para zoom · clic en un agente para seguir su vida</div>
+
     <div class="hud">
       <div class="hud-item"><span class="hud-label">tick</span><span class="hud-value" id="hudTick">—</span></div>
       <div class="hud-item well-hud">
@@ -34,16 +42,27 @@
       <div class="hud-item"><span class="hud-label">cuota</span><span class="hud-value" id="hudQuota">—</span></div>
       <div class="hud-item"><span class="hud-label">vivos</span><span class="hud-value" id="hudAlive">—</span></div>
     </div>
-    <div class="legend">
-      <span><i class="dot" style="background:#3d8bde"></i> gemini-2.5-flash-lite</span>
-      <span><i class="dot" style="background:#f07a3e"></i> gpt-5-nano</span>
-      <span><i class="dot" style="background:#2fbd8a"></i> holdings</span>
-    </div>
   </section>
 
   <aside class="panel">
+    <div id="followCard" class="follow-card" hidden>
+      <div class="follow-top">
+        <canvas id="portrait" width="72" height="88"></canvas>
+        <div class="follow-id">
+          <div class="follow-name" id="fName">—</div>
+          <div class="follow-sub" id="fSub">—</div>
+          <div class="follow-chips">
+            <span class="chip" id="fTrait">—</span>
+            <span class="chip hold" id="fHold">0 agua</span>
+          </div>
+        </div>
+        <button id="unfollow" title="Dejar de seguir">✕</button>
+      </div>
+      <div class="thought"><span class="thought-label">está pensando</span><p id="fThought">…</p></div>
+    </div>
+
     <div class="panel-head">
-      <h2>La sociedad habla</h2>
+      <h2 id="feedTitle">La sociedad habla</h2>
       <span class="live-dot" id="liveDot" title="conexión"></span>
     </div>
     <div id="feed" class="feed"></div>
@@ -57,6 +76,6 @@
   <span>Sociedad sintética de agentes LLM · lectura pública, escritura imposible · los agentes no saben que los miras</span>
 </footer>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=2"></script>
 </body>
 </html>
