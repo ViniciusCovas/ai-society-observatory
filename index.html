@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Society Lab — Observatorio</title>
+<meta name="description" content="Observatorio en vivo de una sociedad sintética de agentes LLM. Experimento pre-registrado.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%234a9ec4'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <h1>AI Society Lab</h1>
+    <span class="tag">observatorio en vivo</span>
+  </div>
+  <div class="header-right">
+    <select id="expSelect" title="Experimento"></select>
+    <div class="clock"><span id="cdmxTime">--:--</span><span class="clock-sub">Ciudad de México</span></div>
+  </div>
+</header>
+
+<main>
+  <section class="stage-wrap">
+    <canvas id="stage"></canvas>
+    <div class="hud">
+      <div class="hud-item"><span class="hud-label">tick</span><span class="hud-value" id="hudTick">—</span></div>
+      <div class="hud-item well-hud">
+        <span class="hud-label">pozo común</span>
+        <div class="well-bar"><div class="well-fill" id="wellFill"></div></div>
+        <span class="hud-value" id="hudWell">—</span>
+      </div>
+      <div class="hud-item"><span class="hud-label">cuota</span><span class="hud-value" id="hudQuota">—</span></div>
+      <div class="hud-item"><span class="hud-label">vivos</span><span class="hud-value" id="hudAlive">—</span></div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#3d8bde"></i> gemini-2.5-flash-lite</span>
+      <span><i class="dot" style="background:#f07a3e"></i> gpt-5-nano</span>
+      <span><i class="dot" style="background:#2fbd8a"></i> holdings</span>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="panel-head">
+      <h2>La sociedad habla</h2>
+      <span class="live-dot" id="liveDot" title="conexión"></span>
+    </div>
+    <div id="feed" class="feed"></div>
+    <div class="panel-foot">
+      <a id="preregLink" href="https://github.com/ViniciusCovas/ai-society-lab" target="_blank" rel="noopener">experimento pre-registrado ↗</a>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  <span>Sociedad sintética de agentes LLM · lectura pública, escritura imposible · los agentes no saben que los miras</span>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
