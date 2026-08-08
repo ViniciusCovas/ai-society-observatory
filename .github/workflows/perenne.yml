@@ -1,0 +1,60 @@
+# Latido de las sociedades perennes de AI Society Lab.
+#
+# Vive en este repo público porque los minutos de Actions son ilimitados en
+# repos públicos; en el repo privado del laboratorio se agotarían a mitad de
+# mes. Nada sensible se expone: la URL y la clave anon ya son públicas por
+# diseño (están en app.js); el ADMIN_SECRET vive en Actions secrets.
+#
+# SOCIEDADES: variable de repo con formato "id=lote,id=lote,…" donde lote es
+# cuántos agentes procesa cada invocación (modelos lentos → lote menor, para
+# caber en el límite de tiempo de la edge function). El reloj de cada sociedad
+# solo avanza cuando todos sus agentes actuaron: nadie pierde el turno.
+# Se apaga borrando la variable.
+
+name: perenne
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: perenne
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    if: vars.SOCIEDADES != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: un latido por sociedad
+        run: |
+          fail=0
+          for entry in $(echo "${{ vars.SOCIEDADES }}" | tr ',' ' '); do
+            id="${entry%%=*}"; lote="${entry##*=}"
+            # Hasta 3 invocaciones por latido: completa el tick de sociedades
+            # cuyo lote es menor que su población. allow_advance solo en la
+            # primera, para que ninguna sociedad avance dos ticks por latido.
+            advance=true
+            for i in 1 2 3; do
+              code=$(curl -s -o /tmp/r.json -w "%{http_code}" --max-time 350 -X POST \
+                "${{ vars.SUPABASE_URL }}/functions/v1/v2-tick" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
+                -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+                -d "{\"experiment_id\":\"$id\",\"max_agents\":$lote,\"allow_advance\":$advance}")
+              echo "[$id lote=$lote intento=$i] HTTP $code: $(cat /tmp/r.json)"
+              advance=false
+              # 409 = otro latido en curso o sociedad cerrada; 429 = presupuesto.
+              case "$code" in
+                200) ;;
+                409|429) break ;;
+                *) fail=1; break ;;
+              esac
+              remaining=$(python3 -c "import json;print(json.load(open('/tmp/r.json')).get('remaining',0))" 2>/dev/null || echo 0)
+              [ "$remaining" = "0" ] && break
+            done
+          done
+          exit $fail
