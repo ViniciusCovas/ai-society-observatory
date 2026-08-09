@@ -34,11 +34,11 @@ jobs:
           fail=0
           for entry in $(echo "${{ vars.SOCIEDADES }}" | tr ',' ' '); do
             id="${entry%%=*}"; lote="${entry##*=}"
-            # Hasta 3 invocaciones por latido: completa el tick de sociedades
+            # Hasta 4 invocaciones por latido: completa el tick de sociedades
             # cuyo lote es menor que su población. allow_advance solo en la
             # primera, para que ninguna sociedad avance dos ticks por latido.
             advance=true
-            for i in 1 2 3; do
+            for i in 1 2 3 4; do
               code=$(curl -s -o /tmp/r.json -w "%{http_code}" --max-time 350 -X POST \
                 "${{ vars.SUPABASE_URL }}/functions/v1/v2-tick" \
                 -H "Content-Type: application/json" \
@@ -47,10 +47,12 @@ jobs:
                 -d "{\"experiment_id\":\"$id\",\"max_agents\":$lote,\"allow_advance\":$advance}")
               echo "[$id lote=$lote intento=$i] HTTP $code: $(cat /tmp/r.json)"
               advance=false
-              # 409 = otro latido en curso o sociedad cerrada; 429 = presupuesto.
+              # 409 = otro latido en curso o cerrada; 429 = presupuesto; 504 = límite
+              # de tiempo de la plataforma — el tick reanudable lo hace inocuo: el
+              # siguiente latido retoma donde quedó. Ninguno es fallo del workflow.
               case "$code" in
                 200) ;;
-                409|429) break ;;
+                409|429|504) break ;;
                 *) fail=1; break ;;
               esac
               remaining=$(python3 -c "import json;print(json.load(open('/tmp/r.json')).get('remaining',0))" 2>/dev/null || echo 0)
