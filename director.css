@@ -153,3 +153,37 @@ body.director {
   .hud-bottom { grid-template-columns: 1fr; }
   .foot-links { justify-self: start; }
 }
+
+/* pista de interacción */
+.hint-click { font-size: 11px !important; color: var(--ink-3) !important; text-transform: none !important; letter-spacing: 0.2px !important; margin-top: 6px !important; }
+
+/* ¿qué se está decidiendo? */
+.debate { right: 28px; bottom: 148px; width: 348px; }
+.debate-row { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.debate-row:last-child { border-bottom: none; }
+.d-k { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3); min-width: 86px; }
+.debate-row b { font-size: 13.5px; font-weight: 550; line-height: 1.4; }
+
+/* la pregunta pasa arriba-derecha si no cabe: la ocultamos en pantallas medianas */
+.question { right: 28px; bottom: 288px; width: 348px; }
+
+/* subtítulos: lo último dicho en público, grande y legible */
+.subtitle {
+  position: fixed; z-index: 4; left: 50%; transform: translateX(-50%);
+  bottom: 128px; max-width: min(760px, 62vw);
+  background: rgba(10, 13, 18, 0.82); border: 1px solid var(--line);
+  border-radius: 14px; padding: 12px 18px; backdrop-filter: blur(12px);
+  text-align: center;
+}
+.sub-who { display: block; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.sub-text { font-size: 16.5px; line-height: 1.5; font-weight: 450; }
+
+/* mini-ficha al seguir a un agente */
+.follow-mini { left: 28px; bottom: 148px; width: 310px; }
+.follow-mini h3 { font-size: 18px; font-weight: 650; }
+.fm-sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.fm-thought { font-size: 12.5px; font-style: italic; color: var(--ink-2); margin-top: 8px; border-left: 2px solid var(--line); padding-left: 10px; line-height: 1.5; }
+#fmClose { position: absolute; top: 10px; right: 10px; background: none; border: 1px solid var(--line); color: var(--ink-3); width: 24px; height: 24px; border-radius: 7px; cursor: pointer; }
+#fmClose:hover { color: var(--ink); }
+#stage { cursor: pointer; }
+@media (max-width: 1100px) { .subtitle { display: none; } .debate { bottom: 148px; } }

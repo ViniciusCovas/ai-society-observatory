@@ -21,6 +21,7 @@
     <div class="brand-text">
       <h1>AI Society Lab</h1>
       <p>observatorio de sociedades sintéticas · en vivo</p>
+      <p class="hint-click">toca a un habitante para seguir su vida</p>
     </div>
   </div>
   <div class="top-right">
@@ -47,9 +48,29 @@
   <ul id="milestones"><li class="ms-empty">escuchando…</li></ul>
 </section>
 
+<section class="card debate" id="debateCard">
+  <div class="card-label">¿qué se está decidiendo?</div>
+  <div class="debate-row"><span class="d-k">ley vigente</span><b id="dLaw">—</b></div>
+  <div class="debate-row"><span class="d-k">sobre la mesa</span><b id="dProposal">—</b></div>
+  <div class="debate-row"><span class="d-k">el pozo</span><b id="dWell">—</b></div>
+</section>
+
 <section class="card question" id="questionCard">
   <div class="card-label">pregunta abierta · <span class="warn">hipótesis, no conclusión</span></div>
   <p id="qText">—</p>
+</section>
+
+<div class="subtitle" id="subtitle" hidden>
+  <span class="sub-who" id="subWho">—</span>
+  <span class="sub-text" id="subText">—</span>
+</div>
+
+<section class="card follow-mini" id="followMini" hidden>
+  <button id="fmClose" title="Volver a la cámara automática">✕</button>
+  <div class="card-label">siguiendo a</div>
+  <h3 id="fmName">—</h3>
+  <p class="fm-sub" id="fmSub">—</p>
+  <p class="fm-thought" id="fmThought">—</p>
 </section>
 
 <footer class="hud-bottom">
@@ -64,7 +85,6 @@
   <div class="foot-links">
     <a href="https://orcid.org/0000-0001-9948-2940" target="_blank" rel="noopener">ORCID 0000-0001-9948-2940</a>
     <a href="https://github.com/ViniciusCovas/ai-society-lab" target="_blank" rel="noopener">pre-registro y código</a>
-    <a href="admin.html">consola de investigación</a>
   </div>
   <p class="disclaimer">Experimento pre-registrado en curso. Lo que se muestra son <strong>datos crudos en vivo</strong> y preguntas abiertas: ningún resultado aquí debe leerse como conclusión validada. Los agentes no reciben instrucciones morales ni objetivos; el mundo es de solo lectura para quien mira.</p>
 </footer>

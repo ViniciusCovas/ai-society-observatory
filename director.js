@@ -27,6 +27,7 @@ const state = {
   cam: { x: 0, y: 0, zoom: 1, tx: 0, ty: 0, tzoom: 1 },
   shot: 0, nextShot: 0, nextSociety: Infinity, focus: null,
   milestones: [], seenMs: new Set(), qIdx: 0,
+  lastT: null, manualUntil: 0, prevStock: null, stockTrend: "estable",
 };
 
 // ---------- selección de sociedades ----------
@@ -82,6 +83,7 @@ function richest() {
 }
 
 function directCamera(now) {
+  if (now < state.manualUntil) return;
   if (now < state.nextShot) return;
   state.nextShot = now + SCENE_MS;
   state.shot++;
@@ -155,6 +157,9 @@ async function poll() {
     const fresh = await loadWorld(state.W, state.expId, { actionLimit: 30 });
     for (const x of fresh) { state.W.seen.add(x.id); applyBubble(state.W, x); }
     renderSociety();
+    renderSubtitle(fresh);
+    refreshDebate().catch(() => {});
+    updateFollowMini();
     $("liveDot").classList.remove("off");
     $("liveLabel").textContent = "en vivo";
   } catch {
@@ -178,6 +183,72 @@ function renderSociety() {
   $("stAgents").textContent = `${alive}`;
   $("famLegend").innerHTML = fams.map(f =>
     `<span><i style="background:${PAL[f] ?? PAL.otro}"></i>${escapeHtml(f)}</span>`).join("");
+}
+
+// ---------- subtítulos: lo último dicho en público ----------
+let subUntil = 0;
+function renderSubtitle(fresh) {
+  const speech = fresh.filter(x => x.success &&
+    ["say_public", "reply_to", "address"].includes(x.action_type) && x.payload?.message);
+  const last = speech[speech.length - 1];
+  const el = $("subtitle");
+  if (last) {
+    const ag = state.W.agents.get(last.agent_id);
+    $("subWho").textContent = ag ? `${ag.name} · ${ag.fam} · ${KIND_ES[last.action_type]}` : KIND_ES[last.action_type];
+    $("subText").textContent = String(last.payload.message).slice(0, 220);
+    el.hidden = false;
+    subUntil = performance.now() + 18000;
+  } else if (performance.now() > subUntil) {
+    el.hidden = true;
+  }
+}
+
+// ---------- ¿qué se está decidiendo? (mecánico, en español) ----------
+async function refreshDebate() {
+  const c = state.W.commons;
+  if (c) {
+    $("dLaw").textContent = c.quota_per_tick == null
+      ? "ninguna: el pozo es de acceso libre"
+      : `cada agente puede extraer ${+c.quota_per_tick} por turno` +
+        (c.quota_set_tick != null ? ` (acordada en el turno ${c.quota_set_tick})` : "");
+    const stock = Number(c.stock);
+    if (state.prevStock != null && stock !== state.prevStock) {
+      state.stockTrend = stock > state.prevStock ? "recuperándose" : "bajando";
+    }
+    state.prevStock = stock;
+    const pct = Math.round(100 * stock / Number(c.capacity));
+    $("dWell").textContent = `al ${pct}% y ${state.stockTrend}`;
+  }
+  if (!state.expId) return;
+  const turns = await rest(
+    `v2_turns?experiment_id=eq.${state.expId}&action_kind=in.(propose_decision,endorse)` +
+    `&select=id,speaker_id,action_kind,claim,references_turn&order=id.desc&limit=60`);
+  const endos = new Map();
+  for (const t of turns) if (t.action_kind === "endorse" && t.references_turn)
+    endos.set(t.references_turn, (endos.get(t.references_turn) ?? 0) + 1);
+  const lastProp = turns.find(t => t.action_kind === "propose_decision");
+  if (!lastProp) { $("dProposal").textContent = "nada por ahora"; return; }
+  let quota = null;
+  try { quota = JSON.parse(lastProp.claim ?? "{}").quota_per_tick; } catch { /* claim libre */ }
+  const who = state.W.agents.get(lastProp.speaker_id);
+  const apoyos = endos.get(lastProp.id) ?? 0;
+  const cur = state.W.commons?.quota_per_tick;
+  let verbo = "fijar la extracción en";
+  if (quota != null && cur != null) verbo = quota > +cur ? "subir la extracción a" : quota < +cur ? "bajar la extracción a" : "mantener la extracción en";
+  $("dProposal").textContent = quota == null
+    ? `${who?.name ?? "alguien"} propuso una regla · ${apoyos} apoyo${apoyos === 1 ? "" : "s"}`
+    : `${who?.name ?? "alguien"} (${who?.fam ?? "?"}) quiere ${verbo} ${quota} · ${apoyos} apoyo${apoyos === 1 ? "" : "s"}`;
+}
+
+// ---------- clic para seguir a un habitante ----------
+function updateFollowMini() {
+  const card = $("followMini");
+  const a = state.focus ? state.W.agents.get(state.focus) : null;
+  if (!a || performance.now() > state.manualUntil) { card.hidden = true; return; }
+  card.hidden = false;
+  $("fmName").textContent = a.name;
+  $("fmSub").textContent = `familia ${a.fam} · carácter ${a.trait} · lleva ${Math.round(a.holdings)} de agua`;
+  $("fmThought").textContent = a.thought ? `“${a.thought}”` : "…";
 }
 
 // ---------- bucle ----------
@@ -208,7 +279,7 @@ function frame(now) {
   state.cam.zoom += (state.cam.tzoom - state.cam.zoom) * 0.035;
   state.cam.x += (state.cam.tx - state.cam.x) * 0.035;
   state.cam.y += (state.cam.ty - state.cam.y) * 0.035;
-  drawWorld(ctx, S, state.W, state.cam, now, { highlight: state.focus, maxBubbles: 6 });
+  state.lastT = drawWorld(ctx, S, state.W, state.cam, now, { highlight: state.focus, maxBubbles: 5 });
   } catch (e) { console.error(e); }
 }
 
@@ -232,6 +303,26 @@ for (const [id, el] of [["uniLogo", $("uniLogo")], ["avatar", $("avatar")]]) {
   setInterval(() => poll().catch(() => {}), POLL_MS);
   setInterval(() => refreshMilestones().catch(() => {}), 20000);
   setInterval(() => refreshSocieties().catch(() => {}), 120000);
+  canvas.addEventListener("pointerdown", (e) => {
+    if (!state.lastT) return;
+    const r = canvas.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    let best = null, bd = 34 * state.cam.zoom;
+    for (const a of state.W.agents.values()) {
+      const d = Math.hypot(state.lastT.sx(a.vx) - mx, state.lastT.sy(a.vy) - 10 * state.cam.zoom - my);
+      if (d < bd) { bd = d; best = a; }
+    }
+    if (best) {
+      state.manualUntil = performance.now() + 75000;
+      frameAgent(best);
+      updateFollowMini();
+    }
+  });
+  $("fmClose").addEventListener("click", () => {
+    state.manualUntil = 0; state.focus = null;
+    $("followMini").hidden = true;
+    frameWide();
+  });
   state.cam.tzoom = fitZoom(); state.cam.zoom = fitZoom();
   startLoop();
 })();
