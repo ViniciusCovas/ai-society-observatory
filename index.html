@@ -3,79 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Society Lab — Observatorio</title>
-<meta name="description" content="Observatorio en vivo de una sociedad sintética de agentes LLM. Experimento pre-registrado.">
+<title>AI Society Lab — sociedades sintéticas en vivo</title>
+<meta name="description" content="Observatorio en vivo de sociedades sintéticas de agentes LLM. Experimento pre-registrado. Dr. Vinicius Covas Alves, Facultad de Comunicación, Universidad Anáhuac.">
+<meta property="og:title" content="AI Society Lab — sociedades sintéticas en vivo">
+<meta property="og:description" content="Dieciséis agentes de inteligencia artificial comparten un pozo. Nadie les dijo qué hacer. Observatorio en vivo de un experimento pre-registrado.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%234a9ec4'/></svg>">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="director.css?v=1">
 </head>
-<body>
-<header>
+<body class="director">
+
+<canvas id="stage"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="hud-top">
   <div class="brand">
-    <span class="brand-dot"></span>
-    <h1>AI Society Lab</h1>
-    <span class="tag">observatorio en vivo</span>
+    <img id="uniLogo" class="uni-logo" src="assets/anahuac.png" alt="" hidden>
+    <div class="brand-text">
+      <h1>AI Society Lab</h1>
+      <p>observatorio de sociedades sintéticas · en vivo</p>
+    </div>
   </div>
-  <div class="header-right">
-    <select id="expSelect" title="Experimento"></select>
-    <div class="clock"><span id="cdmxTime">--:--</span><span class="clock-sub">Ciudad de México</span></div>
+  <div class="top-right">
+    <div class="live"><span class="live-dot" id="liveDot"></span><span id="liveLabel">en vivo</span></div>
+    <div class="clock"><span id="cdmxTime">--:--</span><span>Ciudad de México</span></div>
   </div>
 </header>
 
-<main>
-  <section class="stage-wrap">
-    <canvas id="stage"></canvas>
+<section class="card society" id="societyCard">
+  <div class="card-label">observando ahora</div>
+  <h2 id="socName">—</h2>
+  <p class="society-sub" id="socSub">—</p>
+  <div class="stats">
+    <div><span class="k">tick</span><b id="stTick">—</b></div>
+    <div><span class="k">pozo</span><b id="stWell">—</b></div>
+    <div><span class="k">cuota</span><b id="stQuota">—</b></div>
+    <div><span class="k">agentes</span><b id="stAgents">—</b></div>
+  </div>
+  <div class="fams" id="famLegend"></div>
+</section>
 
-    <div class="cam-controls">
-      <button id="zoomIn" title="Acercar">+</button>
-      <button id="zoomOut" title="Alejar">−</button>
-      <button id="camHome" title="Ver todo">⌂</button>
-    </div>
-    <div class="hint">arrastra para moverte · rueda para zoom · clic en un agente para seguir su vida</div>
+<section class="card milestones">
+  <div class="card-label">últimos hitos del laboratorio</div>
+  <ul id="milestones"><li class="ms-empty">escuchando…</li></ul>
+</section>
 
-    <div class="hud">
-      <div class="hud-item"><span class="hud-label">tick</span><span class="hud-value" id="hudTick">—</span></div>
-      <div class="hud-item well-hud">
-        <span class="hud-label">pozo común</span>
-        <div class="well-bar"><div class="well-fill" id="wellFill"></div></div>
-        <span class="hud-value" id="hudWell">—</span>
-      </div>
-      <div class="hud-item"><span class="hud-label">cuota</span><span class="hud-value" id="hudQuota">—</span></div>
-      <div class="hud-item"><span class="hud-label">vivos</span><span class="hud-value" id="hudAlive">—</span></div>
-    </div>
-  </section>
+<section class="card question" id="questionCard">
+  <div class="card-label">pregunta abierta · <span class="warn">hipótesis, no conclusión</span></div>
+  <p id="qText">—</p>
+</section>
 
-  <aside class="panel">
-    <div id="followCard" class="follow-card" hidden>
-      <div class="follow-top">
-        <canvas id="portrait" width="72" height="88"></canvas>
-        <div class="follow-id">
-          <div class="follow-name" id="fName">—</div>
-          <div class="follow-sub" id="fSub">—</div>
-          <div class="follow-chips">
-            <span class="chip" id="fTrait">—</span>
-            <span class="chip hold" id="fHold">0 agua</span>
-          </div>
-        </div>
-        <button id="unfollow" title="Dejar de seguir">✕</button>
-      </div>
-      <div class="thought"><span class="thought-label">está pensando</span><p id="fThought">…</p></div>
+<footer class="hud-bottom">
+  <div class="author">
+    <img id="avatar" class="avatar" src="assets/avatar.jpg" alt="" hidden>
+    <div>
+      <p class="author-name">Dr. Vinicius Covas Alves</p>
+      <p class="author-aff">Facultad de Comunicación · Universidad Anáhuac<br>
+        CICA — Center for Applied Communication · Human–No Human Communication Lab</p>
     </div>
-
-    <div class="panel-head">
-      <h2 id="feedTitle">La sociedad habla</h2>
-      <span class="live-dot" id="liveDot" title="conexión"></span>
-    </div>
-    <div id="feed" class="feed"></div>
-    <div class="panel-foot">
-      <a id="preregLink" href="https://github.com/ViniciusCovas/ai-society-lab" target="_blank" rel="noopener">experimento pre-registrado ↗</a>
-    </div>
-  </aside>
-</main>
-
-<footer>
-  <span>Sociedad sintética de agentes LLM · lectura pública, escritura imposible · los agentes no saben que los miras</span>
+  </div>
+  <div class="foot-links">
+    <a href="https://orcid.org/0000-0001-9948-2940" target="_blank" rel="noopener">ORCID 0000-0001-9948-2940</a>
+    <a href="https://github.com/ViniciusCovas/ai-society-lab" target="_blank" rel="noopener">pre-registro y código</a>
+    <a href="admin.html">consola de investigación</a>
+  </div>
+  <p class="disclaimer">Experimento pre-registrado en curso. Lo que se muestra son <strong>datos crudos en vivo</strong> y preguntas abiertas: ningún resultado aquí debe leerse como conclusión validada. Los agentes no reciben instrucciones morales ni objetivos; el mundo es de solo lectura para quien mira.</p>
 </footer>
 
-<script type="module" src="app.js?v=2"></script>
+<script type="module" src="director.js?v=1"></script>
 </body>
 </html>
