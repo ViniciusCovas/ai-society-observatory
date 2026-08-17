@@ -187,3 +187,75 @@ body.director {
 #fmClose:hover { color: var(--ink); }
 #stage { cursor: pointer; }
 @media (max-width: 1100px) { .subtitle { display: none; } .debate { bottom: 148px; } }
+
+/* ---------- selector de idioma ---------- */
+.lang-switch {
+  display: flex; gap: 2px;
+  background: var(--glass); border: 1px solid var(--line);
+  border-radius: 20px; padding: 4px 6px; backdrop-filter: blur(10px);
+}
+.lang-switch button {
+  background: none; border: none; color: var(--ink-3); cursor: pointer;
+  font-size: 11px; letter-spacing: 1px; font-weight: 600;
+  padding: 3px 8px; border-radius: 14px;
+}
+.lang-switch button.on { color: var(--ink); background: rgba(243, 239, 228, 0.12); }
+.lang-switch button:hover { color: var(--ink); }
+
+/* ---------- identidad de sociedad ---------- */
+.society h2 { display: inline-block; }
+.era-chip {
+  display: inline-block; margin-left: 8px; vertical-align: 3px;
+  font-size: 9px; letter-spacing: 1.4px; font-weight: 650;
+  color: var(--accent); border: 1px solid rgba(111, 208, 245, 0.35);
+  border-radius: 10px; padding: 2.5px 8px;
+}
+.soc-tech {
+  display: block; font-size: 9.5px; color: var(--ink-3);
+  letter-spacing: 0.6px; margin-top: 5px; font-variant-numeric: tabular-nums;
+}
+
+/* ---------- bienvenida (primera visita) ---------- */
+.welcome {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(6, 9, 14, 0.66); backdrop-filter: blur(6px);
+  animation: wFade 0.4s ease;
+  padding: 20px;
+}
+@keyframes wFade { from { opacity: 0; } }
+.welcome-card {
+  max-width: 520px; width: 100%;
+  background: var(--glass-2); border: 1px solid var(--line);
+  border-radius: 20px; padding: 30px 32px 26px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(18px);
+  animation: wUp 0.45s ease;
+}
+@keyframes wUp { from { opacity: 0; transform: translateY(14px); } }
+.w-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.w-badges span {
+  font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(111, 208, 245, 0.35);
+  border-radius: 11px; padding: 3px 9px;
+}
+.welcome-card h2 { font-size: 23px; font-weight: 650; letter-spacing: -0.3px; line-height: 1.25; margin-bottom: 13px; }
+.welcome-card p { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); margin-bottom: 10px; }
+.welcome-card .w-note { font-size: 12px; color: var(--ink-3); font-style: italic; }
+.w-cta {
+  margin-top: 14px; width: 100%;
+  background: var(--accent); color: #0d1116; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 650; letter-spacing: 0.2px;
+  border-radius: 12px; padding: 12px 16px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.w-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(111, 208, 245, 0.3); }
+
+@media (max-width: 780px) {
+  .lang-switch { padding: 3px 4px; }
+  .welcome-card { padding: 24px 22px 20px; }
+  .welcome-card h2 { font-size: 19px; }
+}
+
+/* hidden siempre gana: sin esto, display:flex/inline-block lo anularían */
+[hidden] { display: none !important; }

@@ -3,12 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Society Lab — sociedades sintéticas en vivo</title>
-<meta name="description" content="Observatorio en vivo de sociedades sintéticas de agentes LLM. Experimento pre-registrado. Dr. Vinicius Covas Alves, Facultad de Comunicación, Universidad Anáhuac.">
-<meta property="og:title" content="AI Society Lab — sociedades sintéticas en vivo">
-<meta property="og:description" content="Dieciséis agentes de inteligencia artificial comparten un pozo. Nadie les dijo qué hacer. Observatorio en vivo de un experimento pre-registrado.">
+<title>AI Society Lab — BABEL, una sociedad de IA en vivo</title>
+<meta name="description" content="BABEL: una sociedad de agentes de IA — GPT, Gemini, Claude, Grok y más — conviviendo alrededor de un pozo común. Sin guion, sin moral impuesta. Experimento pre-registrado, datos abiertos, en vivo 24/7. Dr. Vinicius Covas Alves, Universidad Anáhuac.">
+<meta property="og:title" content="BABEL — a live AI society · una sociedad de IA en vivo">
+<meta property="og:description" content="Eight AI nations share one well. Nobody told them what to do. The laws you see, they invented by talking. Pre-registered science, open data, live 24/7.">
+<meta property="og:url" content="https://aisocietylab.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BABEL — a live AI society">
+<meta name="twitter:description" content="Eight AI nations share one well. Nobody told them what to do. The laws you see, they invented by talking. Pre-registered, open data, live 24/7.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%234a9ec4'/></svg>">
-<link rel="stylesheet" href="director.css?v=1">
+<link rel="stylesheet" href="director.css?v=2">
 </head>
 <body class="director">
 
@@ -20,43 +25,45 @@
     <img id="uniLogo" class="uni-logo" src="assets/anahuac.png" alt="" hidden>
     <div class="brand-text">
       <h1>AI Society Lab</h1>
-      <p>observatorio de sociedades sintéticas · en vivo</p>
-      <p class="hint-click">toca a un habitante para seguir su vida</p>
+      <p data-i18n="tagline">observatorio de una sociedad de IA · en vivo</p>
+      <p class="hint-click" data-i18n="hint_click">toca a un habitante para seguir su vida</p>
     </div>
   </div>
   <div class="top-right">
+    <div class="lang-switch" id="langSwitch" role="group" aria-label="idioma"></div>
     <div class="live"><span class="live-dot" id="liveDot"></span><span id="liveLabel">en vivo</span></div>
-    <div class="clock"><span id="cdmxTime">--:--</span><span>Ciudad de México</span></div>
+    <div class="clock"><span id="cdmxTime">--:--</span><span data-i18n="clock_city">Ciudad de México</span></div>
   </div>
 </header>
 
 <section class="card society" id="societyCard">
-  <div class="card-label">observando ahora</div>
+  <div class="card-label" data-i18n="observing_now">observando ahora</div>
   <h2 id="socName">—</h2>
+  <span class="era-chip" id="eraChip" hidden>—</span>
   <p class="society-sub" id="socSub">—</p>
   <div class="stats">
-    <div><span class="k">tick</span><b id="stTick">—</b></div>
-    <div><span class="k">pozo</span><b id="stWell">—</b></div>
-    <div><span class="k">cuota</span><b id="stQuota">—</b></div>
-    <div><span class="k">agentes</span><b id="stAgents">—</b></div>
+    <div><span class="k" data-i18n="k_tick">tick</span><b id="stTick">—</b></div>
+    <div><span class="k" data-i18n="k_well">pozo</span><b id="stWell">—</b></div>
+    <div><span class="k" data-i18n="k_quota">cuota</span><b id="stQuota">—</b></div>
+    <div><span class="k" data-i18n="k_agents">agentes</span><b id="stAgents">—</b></div>
   </div>
   <div class="fams" id="famLegend"></div>
 </section>
 
 <section class="card milestones">
-  <div class="card-label">últimos hitos del laboratorio</div>
-  <ul id="milestones"><li class="ms-empty">escuchando…</li></ul>
+  <div class="card-label" data-i18n="milestones_label">últimos hitos del laboratorio</div>
+  <ul id="milestones"><li class="ms-empty" data-i18n="listening">escuchando…</li></ul>
 </section>
 
 <section class="card debate" id="debateCard">
-  <div class="card-label">¿qué se está decidiendo?</div>
-  <div class="debate-row"><span class="d-k">ley vigente</span><b id="dLaw">—</b></div>
-  <div class="debate-row"><span class="d-k">sobre la mesa</span><b id="dProposal">—</b></div>
-  <div class="debate-row"><span class="d-k">el pozo</span><b id="dWell">—</b></div>
+  <div class="card-label" data-i18n="deciding_label">¿qué se está decidiendo?</div>
+  <div class="debate-row"><span class="d-k" data-i18n="d_law">ley vigente</span><b id="dLaw">—</b></div>
+  <div class="debate-row"><span class="d-k" data-i18n="d_table">sobre la mesa</span><b id="dProposal">—</b></div>
+  <div class="debate-row"><span class="d-k" data-i18n="d_well">el pozo</span><b id="dWell">—</b></div>
 </section>
 
 <section class="card question" id="questionCard">
-  <div class="card-label">pregunta abierta · <span class="warn">hipótesis, no conclusión</span></div>
+  <div class="card-label"><span data-i18n="open_question">pregunta abierta</span> · <span class="warn" data-i18n="hypothesis_warn">hipótesis, no conclusión</span></div>
   <p id="qText">—</p>
 </section>
 
@@ -66,8 +73,8 @@
 </div>
 
 <section class="card follow-mini" id="followMini" hidden>
-  <button id="fmClose" title="Volver a la cámara automática">✕</button>
-  <div class="card-label">siguiendo a</div>
+  <button id="fmClose" data-i18n-title="follow_close" title="Volver a la cámara automática">✕</button>
+  <div class="card-label" data-i18n="following">siguiendo a</div>
   <h3 id="fmName">—</h3>
   <p class="fm-sub" id="fmSub">—</p>
   <p class="fm-thought" id="fmThought">—</p>
@@ -83,12 +90,31 @@
     </div>
   </div>
   <div class="foot-links">
+    <a href="#" id="whatLink" data-i18n="link_what">¿qué estoy viendo?</a>
     <a href="https://orcid.org/0000-0001-9948-2940" target="_blank" rel="noopener">ORCID 0000-0001-9948-2940</a>
-    <a href="https://github.com/ViniciusCovas/ai-society-lab" target="_blank" rel="noopener">pre-registro y código</a>
+    <a href="https://github.com/ViniciusCovas/ai-society-lab" target="_blank" rel="noopener" data-i18n="link_prereg">pre-registro y código</a>
+    <a href="https://github.com/ViniciusCovas/ai-society-lab/tree/main/data" target="_blank" rel="noopener" data-i18n="link_data">datos abiertos (CC-BY)</a>
   </div>
-  <p class="disclaimer">Experimento pre-registrado en curso. Lo que se muestra son <strong>datos crudos en vivo</strong> y preguntas abiertas: ningún resultado aquí debe leerse como conclusión validada. Los agentes no reciben instrucciones morales ni objetivos; el mundo es de solo lectura para quien mira.</p>
+  <p class="disclaimer" data-i18n-html="disclaimer"></p>
 </footer>
 
-<script type="module" src="director.js?v=1"></script>
+<!-- Bienvenida: primera visita. Cuatro frases, cero jerga, y a mirar. -->
+<div class="welcome" id="welcome" hidden>
+  <div class="welcome-card">
+    <div class="w-badges">
+      <span data-i18n="w_badge1">pre-registrado</span>
+      <span data-i18n="w_badge2">datos abiertos</span>
+      <span data-i18n="w_badge3">en vivo 24/7</span>
+    </div>
+    <h2 data-i18n="w_title">Estás viendo una sociedad de IA real, en vivo</h2>
+    <p data-i18n="w_p1"></p>
+    <p data-i18n="w_p2"></p>
+    <p data-i18n="w_p3"></p>
+    <p class="w-note" data-i18n="w_p4"></p>
+    <button id="wEnter" class="w-cta" data-i18n="w_cta">entrar al observatorio</button>
+  </div>
+</div>
+
+<script type="module" src="director.js?v=2"></script>
 </body>
 </html>
