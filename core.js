@@ -21,6 +21,14 @@ export const FAMILY = {
 };
 export const famOf = (model) => FAMILY[String(model).split("/")[0]] ?? "otro";
 
+// Nombres públicos de las sociedades permanentes (capa editorial, Doc 9 §1 del
+// laboratorio): la procedencia no se toca — en la base siguen siendo
+// naciones-2.1 y perenne-2.1; aquí se muestran con su nombre de pila.
+export const PUBLIC_SOCIETY = {
+  "naciones-2.1": { name: "BABEL", subKey: "soc_babel_sub", era: true },
+  "perenne-2.1": { name: "ESPEJO", subKey: "soc_espejo_sub", era: true },
+};
+
 // Paleta por familia: color = identidad de arquitectura, no ranking.
 export const PAL = {
   Gemini: "#3d8bde", GPT: "#f07a3e", Claude: "#c9873f", Grok: "#5d5d68",

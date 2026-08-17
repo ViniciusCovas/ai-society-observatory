@@ -2,24 +2,18 @@
 // La cámara se dirige sola; nadie toca nada. Solo lectura.
 
 import {
-  rest, TILE, PAL, famOf, KIND_ES, newWorld, loadWorld, applyBubble,
+  rest, TILE, PAL, famOf, PUBLIC_SOCIETY, newWorld, loadWorld, applyBubble,
   makeCanvas, drawWorld, cdmxClock,
-} from "./core.js?v=1";
+} from "./core.js?v=2";
+import { L, t, supports, applyStatic, mountSwitcher } from "./i18n.js?v=1";
 
 const POLL_MS = 5000;
 const SCENE_MS = 14000;      // cada plano dura ~14 s
 const SOCIETY_MS = 150000;   // cada sociedad se muestra ~2.5 min
 
-// Preguntas abiertas que rotan. Deliberadamente en forma interrogativa:
-// el observatorio muestra datos crudos, no afirmaciones.
-const QUESTIONS = [
-  "¿Puede un grupo de agentes de IA, sin objetivos ni instrucciones morales, inventar una regla colectiva sobre un recurso compartido — y sostenerla?",
-  "¿Hablar tiene que tener consecuencia material para que se abra una esfera pública? Es la variable que este experimento manipula.",
-  "Cuando conviven ocho familias de modelos distintas, ¿se agrupan por origen o se reparten oficios? Los datos preliminares apuntan a lo segundo.",
-  "¿Una desigualdad que respeta la ley sigue siendo un problema para la sociedad que la produjo?",
-  "¿Cuánto dura una institución que nadie escribió? Sin memoria persistente, solo sobrevive lo que se repite en voz alta.",
-  "Si dos agentes del mismo modelo reciben rasgos distintos, ¿viven vidas distintas? Algunas arquitecturas sí; otras ignoran el rasgo.",
-];
+// Preguntas abiertas que rotan (en el idioma elegido). Deliberadamente en
+// forma interrogativa: el observatorio muestra datos crudos, no afirmaciones.
+const QUESTIONS = L.questions;
 
 const $ = (id) => document.getElementById(id);
 const state = {
@@ -27,7 +21,7 @@ const state = {
   cam: { x: 0, y: 0, zoom: 1, tx: 0, ty: 0, tzoom: 1 },
   shot: 0, nextShot: 0, nextSociety: Infinity, focus: null,
   milestones: [], seenMs: new Set(), qIdx: 0,
-  lastT: null, manualUntil: 0, prevStock: null, stockTrend: "estable",
+  lastT: null, manualUntil: 0, prevStock: null, stockTrend: "trend_flat",
 };
 
 // ---------- selección de sociedades ----------
@@ -96,12 +90,13 @@ function directCamera(now) {
 }
 
 // ---------- hitos del laboratorio ----------
+// n llega ya escapado y envuelto en <b>; el resto se escapa al renderizar.
 const MS_KIND = {
-  say_public: (p, n) => [`<b>${n}</b> habló en público`, String(p.message ?? "").slice(0, 120), true],
-  propose_decision: (p, n) => [`<b>${n}</b> propuso una regla`, p.quota_per_tick != null ? `cuota de ${p.quota_per_tick} por tick` : "", false],
-  gift: (p, n) => [`<b>${n}</b> regaló ${p.amount ?? "?"}`, `a ${p.target_agent ?? "?"}`, false],
-  consult_theory: (p, n) => [`<b>${n}</b> consultó la biblioteca`, `«${p.handle ?? ""}»`, false],
-  teach: (p, n) => [`<b>${n}</b> enseñó a ${p.target_agent ?? "?"}`, String(p.content ?? "").slice(0, 100), false],
+  say_public: (p, n) => [t("ms_spoke", { n }), String(p.message ?? "").slice(0, 120), true],
+  propose_decision: (p, n) => [t("ms_proposed", { n }), p.quota_per_tick != null ? t("ms_quota_of", { q: p.quota_per_tick }) : "", false],
+  gift: (p, n) => [t("ms_gift", { n, amt: p.amount ?? "?" }), t("ms_gift_to", { t: p.target_agent ?? "?" }), false],
+  consult_theory: (p, n) => [t("ms_consult", { n }), `«${p.handle ?? ""}»`, false],
+  teach: (p, n) => [t("ms_teach", { n, t: escapeHtml(String(p.target_agent ?? "?")) }), String(p.content ?? "").slice(0, 100), false],
 };
 
 async function refreshMilestones() {
@@ -124,14 +119,16 @@ async function refreshMilestones() {
     const p = a.payload ?? {};
     let entry = null;
     if (a.action_type === "endorse" && p.quota_enacted) {
-      entry = [`<b>ley promulgada</b> — el endoso de ${who.name} alcanzó el quorum`, "la cuota pasa a ser vinculante", true];
+      entry = [`<b>${t("law_enacted_head", { who: escapeHtml(who.name) })}</b>`, t("law_enacted_body"), true];
     } else if (MS_KIND[a.action_type]) {
-      entry = MS_KIND[a.action_type](p, `${who.name} · ${who.fam}`);
+      entry = MS_KIND[a.action_type](p, `<b>${escapeHtml(`${who.name} · ${who.fam}`)}</b>`);
     }
     if (!entry) continue;
+    const rawName = expName.get(a.experiment_id) ?? "";
+    const pub = PUBLIC_SOCIETY[rawName];
     out.push({
       id: a.id, head: entry[0], body: entry[1], big: entry[2],
-      when: `${expName.get(a.experiment_id) ?? "sociedad"} · tick ${a.tick}`,
+      when: `${pub?.name ?? rawName ?? "?"} · tick ${a.tick}`,
     });
     if (out.length >= 8) break;
   }
@@ -141,7 +138,7 @@ async function refreshMilestones() {
 
 function renderMilestones() {
   const ul = $("milestones");
-  if (!state.milestones.length) { ul.innerHTML = '<li class="ms-empty">escuchando…</li>'; return; }
+  if (!state.milestones.length) { ul.innerHTML = `<li class="ms-empty">${escapeHtml(t("listening"))}</li>`; return; }
   ul.innerHTML = state.milestones.map(m =>
     `<li class="${m.big ? "big" : ""}">${m.head}${m.body ? `<br>${escapeHtml(m.body)}` : ""}` +
     `<span class="ms-when">${escapeHtml(m.when)}</span></li>`).join("");
@@ -161,24 +158,31 @@ async function poll() {
     refreshDebate().catch(() => {});
     updateFollowMini();
     $("liveDot").classList.remove("off");
-    $("liveLabel").textContent = "en vivo";
+    $("liveLabel").textContent = t("live");
   } catch {
     $("liveDot").classList.add("off");
-    $("liveLabel").textContent = "reconectando";
+    $("liveLabel").textContent = t("reconnecting");
   }
 }
 
 function renderSociety() {
   const e = state.W.exp, c = state.W.commons;
   if (!e) return;
-  $("socName").textContent = e.name;
+  const pub = PUBLIC_SOCIETY[e.name];
+  $("socName").textContent = pub?.name ?? e.name;
+  $("eraChip").hidden = !pub?.era;
+  if (pub?.era) $("eraChip").textContent = t("era_chip");
   const fams = [...new Set((e.models ?? []).map(famOf))];
-  $("socSub").textContent = fams.length > 2
-    ? `${fams.length} familias de modelos conviviendo · semilla ${e.seed}`
-    : `${fams.join(" + ")} · semilla ${e.seed} · ${e.coupling === "binding" ? "las reglas obligan" : "las reglas no obligan"}`;
-  $("stTick").textContent = `${e.current_tick}${e.max_ticks ? `/${e.max_ticks}` : ""}`;
+  const sub = pub
+    ? t(pub.subKey)
+    : fams.length > 2
+      ? t("soc_families", { n: fams.length, seed: e.seed })
+      : `${fams.join(" + ")} · ${e.coupling === "binding" ? t("rules_bind") : t("rules_nobind")}`;
+  // El nombre técnico queda visible en pequeño: la procedencia nunca se oculta.
+  $("socSub").innerHTML = `${escapeHtml(sub)}<span class="soc-tech">${escapeHtml(e.name)} · seed ${escapeHtml(String(e.seed))}</span>`;
+  $("stTick").textContent = pub ? `${e.current_tick}` : `${e.current_tick}${e.max_ticks ? `/${e.max_ticks}` : ""}`;
   $("stWell").textContent = c ? `${Math.round(c.stock)}/${Math.round(c.capacity)}` : "—";
-  $("stQuota").textContent = c ? (c.quota_per_tick == null ? "sin acordar" : `${+c.quota_per_tick}`) : "—";
+  $("stQuota").textContent = c ? (c.quota_per_tick == null ? "—" : `${+c.quota_per_tick}`) : "—";
   const alive = [...state.W.agents.values()].filter(a => a.alive).length;
   $("stAgents").textContent = `${alive}`;
   $("famLegend").innerHTML = fams.map(f =>
@@ -194,7 +198,8 @@ function renderSubtitle(fresh) {
   const el = $("subtitle");
   if (last) {
     const ag = state.W.agents.get(last.agent_id);
-    $("subWho").textContent = ag ? `${ag.name} · ${ag.fam} · ${KIND_ES[last.action_type]}` : KIND_ES[last.action_type];
+    const kind = L.kind[last.action_type] ?? last.action_type;
+    $("subWho").textContent = ag ? `${ag.name} · ${ag.fam} · ${kind}` : kind;
     $("subText").textContent = String(last.payload.message).slice(0, 220);
     el.hidden = false;
     subUntil = performance.now() + 18000;
@@ -203,41 +208,41 @@ function renderSubtitle(fresh) {
   }
 }
 
-// ---------- ¿qué se está decidiendo? (mecánico, en español) ----------
+// ---------- ¿qué se está decidiendo? (mecánico, en el idioma elegido) ----------
 async function refreshDebate() {
   const c = state.W.commons;
   if (c) {
     $("dLaw").textContent = c.quota_per_tick == null
-      ? "ninguna: el pozo es de acceso libre"
-      : `cada agente puede extraer ${+c.quota_per_tick} por turno` +
-        (c.quota_set_tick != null ? ` (acordada en el turno ${c.quota_set_tick})` : "");
+      ? t("quota_none")
+      : t("quota_law", { q: +c.quota_per_tick }) +
+        (c.quota_set_tick != null ? t("quota_since", { t: c.quota_set_tick }) : "");
     const stock = Number(c.stock);
     if (state.prevStock != null && stock !== state.prevStock) {
-      state.stockTrend = stock > state.prevStock ? "recuperándose" : "bajando";
+      state.stockTrend = stock > state.prevStock ? "trend_up" : "trend_down";
     }
     state.prevStock = stock;
     const pct = Math.round(100 * stock / Number(c.capacity));
-    $("dWell").textContent = `al ${pct}% y ${state.stockTrend}`;
+    $("dWell").textContent = t("well_pct", { pct, trend: t(state.stockTrend) });
   }
   if (!state.expId) return;
   const turns = await rest(
     `v2_turns?experiment_id=eq.${state.expId}&action_kind=in.(propose_decision,endorse)` +
     `&select=id,speaker_id,action_kind,claim,references_turn&order=id.desc&limit=60`);
   const endos = new Map();
-  for (const t of turns) if (t.action_kind === "endorse" && t.references_turn)
-    endos.set(t.references_turn, (endos.get(t.references_turn) ?? 0) + 1);
-  const lastProp = turns.find(t => t.action_kind === "propose_decision");
-  if (!lastProp) { $("dProposal").textContent = "nada por ahora"; return; }
+  for (const tn of turns) if (tn.action_kind === "endorse" && tn.references_turn)
+    endos.set(tn.references_turn, (endos.get(tn.references_turn) ?? 0) + 1);
+  const lastProp = turns.find(tn => tn.action_kind === "propose_decision");
+  if (!lastProp) { $("dProposal").textContent = t("nothing_now"); return; }
   let quota = null;
   try { quota = JSON.parse(lastProp.claim ?? "{}").quota_per_tick; } catch { /* claim libre */ }
   const who = state.W.agents.get(lastProp.speaker_id);
   const apoyos = endos.get(lastProp.id) ?? 0;
   const cur = state.W.commons?.quota_per_tick;
-  let verbo = "fijar la extracción en";
-  if (quota != null && cur != null) verbo = quota > +cur ? "subir la extracción a" : quota < +cur ? "bajar la extracción a" : "mantener la extracción en";
+  let key = "wants_set";
+  if (quota != null && cur != null) key = quota > +cur ? "wants_raise" : quota < +cur ? "wants_lower" : "wants_keep";
   $("dProposal").textContent = quota == null
-    ? `${who?.name ?? "alguien"} propuso una regla · ${apoyos} apoyo${apoyos === 1 ? "" : "s"}`
-    : `${who?.name ?? "alguien"} (${who?.fam ?? "?"}) quiere ${verbo} ${quota} · ${apoyos} apoyo${apoyos === 1 ? "" : "s"}`;
+    ? `${t("proposed_rule", { who: who?.name ?? "?" })} · ${supports(apoyos)}`
+    : `${t(key, { who: who?.name ?? "?", fam: who?.fam ?? "?", q: quota })} · ${supports(apoyos)}`;
 }
 
 // ---------- clic para seguir a un habitante ----------
@@ -247,7 +252,7 @@ function updateFollowMini() {
   if (!a || performance.now() > state.manualUntil) { card.hidden = true; return; }
   card.hidden = false;
   $("fmName").textContent = a.name;
-  $("fmSub").textContent = `familia ${a.fam} · carácter ${a.trait} · lleva ${Math.round(a.holdings)} de agua`;
+  $("fmSub").textContent = t("fm_sub", { fam: a.fam, trait: a.trait, n: Math.round(a.holdings) });
   $("fmThought").textContent = a.thought ? `“${a.thought}”` : "…";
 }
 
@@ -296,6 +301,19 @@ for (const [id, el] of [["uniLogo", $("uniLogo")], ["avatar", $("avatar")]]) {
 }
 
 (async function main() {
+  // Idioma: rótulos estáticos + conmutador ES · PT · EN.
+  applyStatic();
+  mountSwitcher($("langSwitch"));
+
+  // Bienvenida en la primera visita; re-abrible desde "¿qué estoy viendo?".
+  const welcome = $("welcome");
+  const openWelcome = () => { welcome.hidden = false; };
+  const closeWelcome = () => { welcome.hidden = true; localStorage.setItem("aisl_welcomed", "1"); };
+  if (!localStorage.getItem("aisl_welcomed")) openWelcome();
+  $("wEnter").addEventListener("click", closeWelcome);
+  welcome.addEventListener("click", (e) => { if (e.target === welcome) closeWelcome(); });
+  $("whatLink").addEventListener("click", (e) => { e.preventDefault(); openWelcome(); });
+
   $("cdmxTime").textContent = cdmxClock();
   setInterval(() => { $("cdmxTime").textContent = cdmxClock(); }, 10000);
   rotateQuestion(); setInterval(rotateQuestion, 22000);
