@@ -1,20 +1,30 @@
-# Latido de las sociedades perennes de AI Society Lab.
+# Latido de las sociedades permanentes de AI Society Lab: BABEL (naciones-2.1,
+# la sociedad oficial) y ESPEJO (perenne-2.1, la gemela de control monocultura).
+# Nomenclatura y régimen: ai-society-lab docs/09-programa-babel.md.
+#
+# Cadencia de vitrina (Doc 9 §3): cada 6 horas ⇒ ~3-4 ticks/día por sociedad
+# (cada latido completa como máximo UN tick). Sobre las sociedades permanentes
+# no se experimenta; este ritmo lento es su vida normal y se acelera solo en
+# momentos de audiencia (editar el cron y revertirlo después, documentándolo).
 #
 # Vive en este repo público porque los minutos de Actions son ilimitados en
-# repos públicos; en el repo privado del laboratorio se agotarían a mitad de
-# mes. Nada sensible se expone: la URL y la clave anon ya son públicas por
-# diseño (están en app.js); el ADMIN_SECRET vive en Actions secrets.
+# repos públicos. Nada sensible se expone: la URL y la clave anon ya son
+# públicas por diseño (están en app.js); el ADMIN_SECRET vive en Actions
+# secrets.
 #
 # SOCIEDADES: variable de repo con formato "id=lote,id=lote,…" donde lote es
 # cuántos agentes procesa cada invocación (modelos lentos → lote menor, para
 # caber en el límite de tiempo de la edge function). El reloj de cada sociedad
 # solo avanza cuando todos sus agentes actuaron: nadie pierde el turno.
+# Valor de la era Babel/Espejo (solo las dos permanentes; las expediciones
+# corren con el runner local, nunca aquí):
+#   <id-de-babel>=4,<id-de-espejo>=16
 # Se apaga borrando la variable.
 
 name: perenne
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "0 */6 * * *"
   workflow_dispatch: {}
 
 permissions: {}
