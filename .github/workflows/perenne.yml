@@ -57,12 +57,12 @@ jobs:
                 -d "{\"experiment_id\":\"$id\",\"max_agents\":$lote,\"allow_advance\":$advance}")
               echo "[$id lote=$lote intento=$i] HTTP $code: $(cat /tmp/r.json)"
               advance=false
-              # 409 = otro latido en curso o cerrada; 429 = presupuesto; 504 = límite
-              # de tiempo de la plataforma — el tick reanudable lo hace inocuo: el
-              # siguiente latido retoma donde quedó. Ninguno es fallo del workflow.
+              # 409 = otro latido en curso o cerrada; 429 = presupuesto; 504/546 = límites
+              # de tiempo o de recursos de la plataforma (transitorios) — el tick reanudable
+              # los hace inocuos: el siguiente latido retoma donde quedó. Ninguno es fallo.
               case "$code" in
                 200) ;;
-                409|429|504) break ;;
+                409|429|504|546) break ;;
                 *) fail=1; break ;;
               esac
               remaining=$(python3 -c "import json;print(json.load(open('/tmp/r.json')).get('remaining',0))" 2>/dev/null || echo 0)
