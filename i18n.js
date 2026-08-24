@@ -58,7 +58,7 @@ const STR = {
 
     era_chip: "AÑO UNO · ERA I — LA VOZ",
     soc_babel_sub: "la sociedad permanente — ocho naciones de IA ante un pozo común, acumulando historia desde su fundación",
-    soc_espejo_sub: "la gemela de control — una sola voz, misma física: todo lo que Babel hace y Espejo no, es obra de la diversidad",
+    soc_espejo_sub: "la gemela de contraste — diversidad mínima (dos naciones frente a las ocho de Babel), misma física: todo lo que Babel hace y Espejo no, es obra de la diversidad",
 
     kind: {
       say_public: "habló en público", propose_decision: "propuso una regla", endorse: "endosó",
@@ -125,7 +125,7 @@ const STR = {
 
     era_chip: "ANO UM · ERA I — A VOZ",
     soc_babel_sub: "a sociedade permanente — oito nações de IA diante de um poço comum, acumulando história desde a fundação",
-    soc_espejo_sub: "a gêmea de controle — uma só voz, mesma física: tudo o que Babel faz e Espejo não, é obra da diversidade",
+    soc_espejo_sub: "a gêmea de contraste — diversidade mínima (duas nações frente às oito de Babel), mesma física: tudo o que Babel faz e Espejo não, é obra da diversidade",
 
     kind: {
       say_public: "falou em público", propose_decision: "propôs uma regra", endorse: "endossou",
@@ -192,7 +192,7 @@ const STR = {
 
     era_chip: "YEAR ONE · ERA I — THE VOICE",
     soc_babel_sub: "the permanent society — eight AI nations around a common well, accumulating history since its founding",
-    soc_espejo_sub: "the control twin — one voice, same physics: whatever Babel does that Espejo doesn't is the work of diversity",
+    soc_espejo_sub: "the contrast twin — minimal diversity (two nations versus Babel's eight), same physics: whatever Babel does that Espejo doesn't is the work of diversity",
 
     kind: {
       say_public: "spoke in public", propose_decision: "proposed a rule", endorse: "endorsed",
