@@ -5,7 +5,7 @@ import {
   rest, TILE, PAL, famOf, PUBLIC_SOCIETY, newWorld, loadWorld, applyBubble,
   makeCanvas, drawWorld, cdmxClock,
 } from "./core.js?v=2";
-import { L, t, supports, applyStatic, mountSwitcher } from "./i18n.js?v=1";
+import { L, t, supports, applyStatic, mountSwitcher } from "./i18n.js?v=2";
 
 const POLL_MS = 5000;
 const SCENE_MS = 14000;      // cada plano dura ~14 s
