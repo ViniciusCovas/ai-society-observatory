@@ -2,10 +2,13 @@
 # la sociedad oficial) y ESPEJO (perenne-2.1, la gemela de control monocultura).
 # Nomenclatura y régimen: ai-society-lab docs/09-programa-babel.md.
 #
-# Cadencia de vitrina (Doc 9 §3): cada 6 horas ⇒ ~3-4 ticks/día por sociedad
-# (cada latido completa como máximo UN tick). Sobre las sociedades permanentes
-# no se experimenta; este ritmo lento es su vida normal y se acelera solo en
-# momentos de audiencia (editar el cron y revertirlo después, documentándolo).
+# Cadencia de supervivencia (enmienda 2026-09-07 del Doc 00): UN latido al día
+# ⇒ 1 tick/día por sociedad (cada latido completa como máximo UN tick). Medido
+# en el proveedor: a 4 latidos/día las dos sociedades gastaban $0.215/día; a
+# uno, ~$0.06. El tiempo de Babel se cuenta en ticks, no en fechas (Doc 00 §5),
+# así que bajar la cadencia no cambia nada de la ciencia: solo estira el saldo.
+# Sobre las sociedades permanentes no se experimenta; volver a "0 */6 * * *"
+# cuando haya presupuesto, documentándolo en el Doc 00.
 #
 # Vive en este repo público porque los minutos de Actions son ilimitados en
 # repos públicos. Nada sensible se expone: la URL y la clave anon ya son
@@ -24,7 +27,7 @@
 name: perenne
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 12 * * *"
   workflow_dispatch: {}
 
 permissions: {}
